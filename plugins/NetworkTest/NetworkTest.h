@@ -149,6 +149,12 @@ class NetworkTest :  public CorePlugin {
 	string*m_name;
 
 	int getModeLatency();
+
+	uint64_t generateOverlayData();
+	void populateReference();
+	void checkCorruption(Message*message);
+
+	uint64_t m_reference[1024];
 public:
 	/** initialize the NetworkTest */
 	void constructor(Rank rank,int size,StaticVector*inbox,StaticVector*outbox,RingAllocator*outboxAllocator,

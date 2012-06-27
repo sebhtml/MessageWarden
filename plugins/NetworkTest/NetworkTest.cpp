@@ -22,6 +22,7 @@
 #include <communication/mpi_tags.h>
 #include <core/slave_modes.h>
 #include <core/master_modes.h>
+#include <cryptography/crypto.h>
 #include <sstream>
 #include <core/OperatingSystem.h>
 #include <fstream>
@@ -88,6 +89,76 @@ void NetworkTest::constructor(int rank,int size,StaticVector*inbox,StaticVector*
 	m_sentMicroseconds.reserve(m_numberOfTestMessages);
 	m_destinations.reserve(m_numberOfTestMessages);
 	m_receivedMicroseconds.reserve(m_numberOfTestMessages);
+
+	populateReference();
+
+	if(m_rank==0){
+		cout<<"Reference"<<endl;
+		for(int i=0;i<m_numberOfWords;i++){
+			cout<<i<<"	"<<m_reference[i]<<endl;
+		}
+	}
+}
+
+void NetworkTest::populateReference(){
+	for(int i=0;i<m_numberOfWords;i++){
+
+		uint64_t seed=9876589*(i+88);
+
+		m_reference[i]=uniform_hashing_function_1_64_64(seed);
+	}
+}
+
+uint64_t NetworkTest::generateOverlayData(){
+	uint64_t randomNumber=rand();
+
+	return uniform_hashing_function_1_64_64(randomNumber);
+}
+
+void NetworkTest::checkCorruption(Message*message){
+
+	int count=message->getCount();
+	MessageUnit*buffer=message->getBuffer();
+
+	bool corrupted=false;
+
+	if(count!=m_numberOfWords){
+		corrupted=true;
+	}
+
+	int mismatches=0;
+
+	for(int i=0;i<m_numberOfWords;i++){
+		uint64_t expected=m_reference[i];
+		uint64_t actual=buffer[i];
+
+		if(expected!=actual){
+			corrupted=true;
+			mismatches++;
+		}
+	}
+
+	if(corrupted){
+		cout<<"Warning: message corruption detected on reception !"<<endl;
+		cout<<" Mismatches: "<<mismatches<<endl;
+		cout<<" Source: "<<message->getSource()<<endl;
+		cout<<" Destination: "<<message->getDestination()<<endl;
+		cout<<" Expected count: "<<m_numberOfWords<<endl;
+		cout<<" Actual count: "<<count<<endl;
+
+		cout<<"BufferIndex	Expected	Actual	Result"<<endl;
+		for(int i=0;i<m_numberOfWords;i++){
+			cout<<i<<"\t"<<m_reference[i]<<"\t"<<buffer[i]<<"\t";
+			if(m_reference[i]==buffer[i])
+				cout<<"PASS";
+			else
+				cout<<"FAIL";
+			cout<<endl;
+		}
+
+
+	}
+
 }
 
 /** call the slave method 
@@ -134,6 +205,14 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 			m_destinations.push_back(destination);
 
 			MessageUnit *message=(MessageUnit*)m_outboxAllocator->allocate(m_numberOfWords*sizeof(MessageUnit));
+
+			for(int i=0;i<m_numberOfWords;i++){
+				message[i]=m_reference[i];
+
+			}
+
+			//message[0]=12;
+
 			Message aMessage(message,m_numberOfWords,destination,RAY_MPI_TAG_TEST_NETWORK_MESSAGE,m_rank);
 			m_outbox->push_back(aMessage);
 			m_sentCurrentTestMessage=true;
@@ -145,6 +224,10 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 		}else if(m_inbox->size()>0 && m_inbox->at(0)->getTag()==RAY_MPI_TAG_TEST_NETWORK_MESSAGE_REPLY){
 			uint64_t endingMicroSeconds=getMicroseconds();
 			
+			Message*messageObject=m_inbox->at(0);
+
+			checkCorruption(messageObject);
+
 			m_receivedMicroseconds.push_back(endingMicroSeconds);
 
 			m_sentCurrentTestMessage=false;
@@ -341,7 +424,19 @@ void NetworkTest::call_MY_TEST_MPI_TAG_STOP_AND_DIE(Message*message){
 
 /* we reply with an empty message */
 void NetworkTest::call_RAY_MPI_TAG_TEST_NETWORK_MESSAGE(Message*message){
-	Message aMessage(NULL,0,message->getSource(),RAY_MPI_TAG_TEST_NETWORK_MESSAGE_REPLY,m_rank);
+
+	checkCorruption(message);
+
+	int count=message->getCount();
+	MessageUnit*buffer=message->getBuffer();
+
+	MessageUnit *reply=(MessageUnit*)m_outboxAllocator->allocate(count*sizeof(MessageUnit));
+
+	for(int i=0;i<count;i++){
+		reply[i]=m_reference[i];
+	}
+
+	Message aMessage(reply,count,message->getSource(),RAY_MPI_TAG_TEST_NETWORK_MESSAGE_REPLY,m_rank);
 	m_outbox->push_back(aMessage);
 }
 
