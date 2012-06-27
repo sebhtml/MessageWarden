@@ -75,7 +75,7 @@ void NetworkTest::constructor(int rank,int size,StaticVector*inbox,StaticVector*
 	/* default is 500 */
 	m_numberOfWords=500;
 
-	m_messagesPerRank=1000;
+	m_messagesPerRank=8000000;
 
 	m_numberOfTestMessages=m_size*m_messagesPerRank;
 
@@ -232,7 +232,7 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 
 			m_sentCurrentTestMessage=false;
 
-			if(m_currentTestMessage % m_messagesPerRank == 0){
+			if(m_currentTestMessage % m_messagesPerRank == 1000){
 				cout<<"Rank "<<m_rank<<" is testing the network ["<<m_currentTestMessage<<"/";
 				cout<<m_numberOfTestMessages<<"]"<<endl;
 			}
