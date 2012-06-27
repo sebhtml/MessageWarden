@@ -102,6 +102,8 @@ class NetworkTest :  public CorePlugin {
 	vector<uint64_t> m_sentMicroseconds;
 	vector<uint64_t> m_receivedMicroseconds;
 
+	int m_lastCount;
+
 	/* number of words to use for network test */
 	/* a word is 8 bytes */
 	/* MAXIMUM_MESSAGE_SIZE_IN_BYTES is 4000 per default so 
@@ -153,6 +155,8 @@ class NetworkTest :  public CorePlugin {
 	uint64_t generateOverlayData();
 	void populateReference();
 	void checkCorruption(Message*message);
+
+	uint64_t m_lastSnapshot;
 
 	uint64_t m_reference[1024];
 public:

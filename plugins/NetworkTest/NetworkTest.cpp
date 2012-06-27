@@ -79,7 +79,12 @@ void NetworkTest::constructor(int rank,int size,StaticVector*inbox,StaticVector*
 
 	m_numberOfTestMessages=m_size*m_messagesPerRank;
 
-	cout<<"will send "<<m_numberOfTestMessages<<endl;
+	if(m_rank==0){
+		cout<<"MessageWarden"<<endl;
+		cout<<endl;
+	}
+
+	//cout<<"will send "<<m_numberOfTestMessages<<endl;
 
 	m_writeRawData=false;
 	/* the seed must be different for all MPI ranks */
@@ -223,6 +228,11 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 
 		}else if(m_inbox->size()>0 && m_inbox->at(0)->getTag()==RAY_MPI_TAG_TEST_NETWORK_MESSAGE_REPLY){
 			uint64_t endingMicroSeconds=getMicroseconds();
+
+			if(m_lastSnapshot==0){
+				m_lastSnapshot=endingMicroSeconds;
+				m_lastCount=0;
+			}
 			
 			Message*messageObject=m_inbox->at(0);
 
@@ -232,9 +242,32 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 
 			m_sentCurrentTestMessage=false;
 
-			if(m_currentTestMessage % 1000 == 0){
+			if(endingMicroSeconds - m_lastSnapshot >= 1000000){
+
 				cout<<"Rank "<<m_rank<<" is testing the network ["<<m_currentTestMessage<<"/";
 				cout<<m_numberOfTestMessages<<"]"<<endl;
+
+				uint64_t messages= m_currentTestMessage- m_lastCount ;
+
+				uint64_t theTime=(endingMicroSeconds-m_lastSnapshot);
+
+				double rate=(messages)/(theTime/1000000.0);
+
+				cout<<"Speed -> "<<rate<<" test messages / second"<<endl;
+/*
+				cout<<" messages: "<<messages<<endl;
+				cout<<" microseconds: "<<theTime<<endl;
+*/
+
+				int remaining=m_numberOfTestMessages-m_currentTestMessage;
+
+				int seconds=remaining/rate;
+
+				cout<<"      Remaining: "<<seconds<<" seconds"<<endl;
+
+				m_lastSnapshot=endingMicroSeconds;
+
+				m_lastCount=m_currentTestMessage;
 			}
 
 			m_currentTestMessage++;
@@ -504,6 +537,8 @@ void NetworkTest::registerPlugin(ComputeCore*core){
 	m_adapter_MY_TEST_MPI_TAG_STOP_AND_DIE.setObject(this);
 	core->setMessageTagObjectHandler(m_plugin,MY_TEST_MPI_TAG_STOP_AND_DIE,&m_adapter_MY_TEST_MPI_TAG_STOP_AND_DIE);
 
+	m_lastSnapshot=0;
+	m_lastCount=0;
 }
 
 void NetworkTest::resolveSymbols(ComputeCore*core){
