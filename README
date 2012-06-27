@@ -1,0 +1,29 @@
+## Information 
+
+MessageWarden - an acceptation test for supercomputers
+
+This program utilises RayPlatform.
+
+## Features 
+
+This is a program to test the network.
+
+In particular, this tool will detect message corruption.
+
+
+## Installation 
+
+You need RayPlatform in the parent directory so that the symbolic link
+resolves.
+
+You also need mpicxx.
+
+To compile:
+
+	make
+
+
+## How to run it 
+
+	mpiexex -n 64 MessageWarden
+
