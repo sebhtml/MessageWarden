@@ -232,7 +232,7 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 
 			m_sentCurrentTestMessage=false;
 
-			if(m_currentTestMessage % m_messagesPerRank == 1000){
+			if(m_currentTestMessage % 1000 == 0){
 				cout<<"Rank "<<m_rank<<" is testing the network ["<<m_currentTestMessage<<"/";
 				cout<<m_numberOfTestMessages<<"]"<<endl;
 			}
