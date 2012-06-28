@@ -206,8 +206,10 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 			/** send to a random rank */
 			int destination=rand()%m_size;
 
-			m_sentMicroseconds.push_back(startingTimeMicroseconds);
-			m_destinations.push_back(destination);
+			if(m_sentMicroseconds.size() < m_maximumPoints){
+				m_sentMicroseconds.push_back(startingTimeMicroseconds);
+				m_destinations.push_back(destination);
+			}
 
 			MessageUnit *message=(MessageUnit*)m_outboxAllocator->allocate(m_numberOfWords*sizeof(MessageUnit));
 
@@ -238,7 +240,9 @@ void NetworkTest::call_RAY_SLAVE_MODE_TEST_NETWORK(){
 
 			checkCorruption(messageObject);
 
-			m_receivedMicroseconds.push_back(endingMicroSeconds);
+			if(m_receivedMicroseconds.size() < m_maximumPoints){
+				m_receivedMicroseconds.push_back(endingMicroSeconds);
+			}
 
 			m_sentCurrentTestMessage=false;
 
@@ -580,4 +584,6 @@ void NetworkTest::resolveSymbols(ComputeCore*core){
 	#endif
 	
 	m_finished=false;
+
+	m_maximumPoints=10000;
 }

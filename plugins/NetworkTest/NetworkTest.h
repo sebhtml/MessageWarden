@@ -103,6 +103,7 @@ class NetworkTest :  public CorePlugin {
 	vector<uint64_t> m_receivedMicroseconds;
 
 	int m_lastCount;
+	int m_maximumPoints;
 
 	/* number of words to use for network test */
 	/* a word is 8 bytes */
