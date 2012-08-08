@@ -30,17 +30,19 @@
 #include <core/statistics.h>
 #include <iostream>
 #include <core/ComputeCore.h>
-
- /* generated_automatically */
-____CreateMasterModeAdapterImplementation(NetworkTest,RAY_MASTER_MODE_TEST_NETWORK); /* generated_automatically */
- /* generated_automatically */
-____CreateSlaveModeAdapterImplementation(NetworkTest,RAY_SLAVE_MODE_TEST_NETWORK); /* generated_automatically */
- /* generated_automatically */
- /* generated_automatically */
-
-____CreateMessageTagAdapterImplementation(NetworkTest,RAY_MPI_TAG_TEST_NETWORK_MESSAGE); /* generated_automatically */
-____CreateMessageTagAdapterImplementation(NetworkTest,MY_TEST_MPI_TAG_STOP_AND_DIE);
 using namespace std;
+
+__CreatePlugin(NetworkTest);
+
+ /* generated_automatically */
+__CreateMasterModeAdapter(NetworkTest,RAY_MASTER_MODE_TEST_NETWORK); /* generated_automatically */
+ /* generated_automatically */
+__CreateSlaveModeAdapter(NetworkTest,RAY_SLAVE_MODE_TEST_NETWORK); /* generated_automatically */
+ /* generated_automatically */
+ /* generated_automatically */
+
+__CreateMessageTagAdapter(NetworkTest,RAY_MPI_TAG_TEST_NETWORK_MESSAGE); /* generated_automatically */
+__CreateMessageTagAdapter(NetworkTest,MY_TEST_MPI_TAG_STOP_AND_DIE);
 
 #define LATENCY_INFORMATION_NOT_AVAILABLE 123123123
 
@@ -75,7 +77,7 @@ void NetworkTest::constructor(int rank,int size,StaticVector*inbox,StaticVector*
 	/* default is 500 */
 	m_numberOfWords=500;
 
-	m_messagesPerRank=8000000;
+	m_messagesPerRank=10000;
 
 	m_numberOfTestMessages=m_size*m_messagesPerRank;
 
@@ -507,13 +509,11 @@ void NetworkTest::registerPlugin(ComputeCore*core){
 	core->setPluginLicense(plugin,"GNU General Public License version 3");
 
 	RAY_SLAVE_MODE_TEST_NETWORK=core->allocateSlaveModeHandle(plugin);
-	m_adapter_RAY_SLAVE_MODE_TEST_NETWORK.setObject(this);
-	core->setSlaveModeObjectHandler(plugin,RAY_SLAVE_MODE_TEST_NETWORK, &m_adapter_RAY_SLAVE_MODE_TEST_NETWORK);
+	core->setSlaveModeObjectHandler(plugin,RAY_SLAVE_MODE_TEST_NETWORK, __GetAdapter(NetworkTest,RAY_SLAVE_MODE_TEST_NETWORK));
 	core->setSlaveModeSymbol(plugin,RAY_SLAVE_MODE_TEST_NETWORK,"RAY_SLAVE_MODE_TEST_NETWORK");
 
 	RAY_MASTER_MODE_TEST_NETWORK=core->allocateMasterModeHandle(plugin);
-	m_adapter_RAY_MASTER_MODE_TEST_NETWORK.setObject(this);
-	core->setMasterModeObjectHandler(plugin,RAY_MASTER_MODE_TEST_NETWORK, &m_adapter_RAY_MASTER_MODE_TEST_NETWORK);
+	core->setMasterModeObjectHandler(plugin,RAY_MASTER_MODE_TEST_NETWORK, __GetAdapter(NetworkTest,RAY_MASTER_MODE_TEST_NETWORK));
 	core->setMasterModeSymbol(plugin,RAY_MASTER_MODE_TEST_NETWORK,"RAY_MASTER_MODE_TEST_NETWORK");
 
 	RAY_MPI_TAG_TEST_NETWORK=core->allocateMessageTagHandle(plugin);
@@ -521,8 +521,7 @@ void NetworkTest::registerPlugin(ComputeCore*core){
 
 	RAY_MPI_TAG_TEST_NETWORK_MESSAGE=core->allocateMessageTagHandle(plugin);
 	core->setMessageTagSymbol(plugin,RAY_MPI_TAG_TEST_NETWORK_MESSAGE,"RAY_MPI_TAG_TEST_NETWORK_MESSAGE");
-	m_adapter_RAY_MPI_TAG_TEST_NETWORK_MESSAGE.setObject(this);
-	core->setMessageTagObjectHandler(plugin,RAY_MPI_TAG_TEST_NETWORK_MESSAGE,&m_adapter_RAY_MPI_TAG_TEST_NETWORK_MESSAGE);
+	core->setMessageTagObjectHandler(plugin,RAY_MPI_TAG_TEST_NETWORK_MESSAGE,__GetAdapter(NetworkTest,RAY_MPI_TAG_TEST_NETWORK_MESSAGE));
 
 	RAY_MPI_TAG_TEST_NETWORK_MESSAGE_REPLY=core->allocateMessageTagHandle(plugin);
 	core->setMessageTagSymbol(plugin,RAY_MPI_TAG_TEST_NETWORK_MESSAGE_REPLY,"RAY_MPI_TAG_TEST_NETWORK_MESSAGE_REPLY");
@@ -538,8 +537,7 @@ void NetworkTest::registerPlugin(ComputeCore*core){
 
 
 	MY_TEST_MPI_TAG_STOP_AND_DIE=core->allocateMessageTagHandle(m_plugin);
-	m_adapter_MY_TEST_MPI_TAG_STOP_AND_DIE.setObject(this);
-	core->setMessageTagObjectHandler(m_plugin,MY_TEST_MPI_TAG_STOP_AND_DIE,&m_adapter_MY_TEST_MPI_TAG_STOP_AND_DIE);
+	core->setMessageTagObjectHandler(m_plugin,MY_TEST_MPI_TAG_STOP_AND_DIE,__GetAdapter(NetworkTest,MY_TEST_MPI_TAG_STOP_AND_DIE));
 
 	m_lastSnapshot=0;
 	m_lastCount=0;
@@ -586,4 +584,6 @@ void NetworkTest::resolveSymbols(ComputeCore*core){
 	m_finished=false;
 
 	m_maximumPoints=10000;
+
+	__BindPlugin(NetworkTest);
 }

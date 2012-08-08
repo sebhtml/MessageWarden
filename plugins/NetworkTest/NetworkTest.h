@@ -31,19 +31,6 @@
 #include <map>
 using namespace std;
 
- /* generated_automatically */
-class NetworkTest; /* generated_automatically */
- /* generated_automatically */
-____CreateMasterModeAdapterDeclaration(NetworkTest,RAY_MASTER_MODE_TEST_NETWORK); /* generated_automatically */
- /* generated_automatically */
-____CreateSlaveModeAdapterDeclaration(NetworkTest,RAY_SLAVE_MODE_TEST_NETWORK); /* generated_automatically */
- /* generated_automatically */
- /* generated_automatically */
-
-
-____CreateMessageTagAdapterDeclaration(NetworkTest,RAY_MPI_TAG_TEST_NETWORK_MESSAGE); /* generated_automatically */
-____CreateMessageTagAdapterDeclaration(NetworkTest,MY_TEST_MPI_TAG_STOP_AND_DIE);
-
 /**
  * This class tests the network
  * Tested elements:
@@ -77,11 +64,6 @@ class NetworkTest :  public CorePlugin {
 	MasterMode RAY_MASTER_MODE_COUNT_FILE_ENTRIES;
 
 	SlaveMode RAY_SLAVE_MODE_TEST_NETWORK;
-
-	Adapter_RAY_SLAVE_MODE_TEST_NETWORK m_adapter_RAY_SLAVE_MODE_TEST_NETWORK;
-	Adapter_RAY_MASTER_MODE_TEST_NETWORK m_adapter_RAY_MASTER_MODE_TEST_NETWORK;
-	Adapter_RAY_MPI_TAG_TEST_NETWORK_MESSAGE m_adapter_RAY_MPI_TAG_TEST_NETWORK_MESSAGE;
-	Adapter_MY_TEST_MPI_TAG_STOP_AND_DIE m_adapter_MY_TEST_MPI_TAG_STOP_AND_DIE;
 
 	SwitchMan*m_switchMan;
 	
